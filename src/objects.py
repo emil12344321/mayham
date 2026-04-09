@@ -15,6 +15,20 @@ sprite.kill -> removes from all groups
 import pygame
 
 
+class Obstacle(pygame.sprite.Sprite):
+    """A static rectangular obstacle that ships can collide with."""
+
+    def __init__(self, x: int, y: int, size: tuple[int, int], color: tuple[int, int, int]):
+        super().__init__()
+
+        self.image = pygame.Surface(size)
+        self.image.fill(color)
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the obstacle on screen."""
+        screen.blit(self.image, self.rect)
+
 
 class Ship(pygame.sprite.Sprite):
 

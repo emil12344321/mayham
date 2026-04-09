@@ -8,7 +8,8 @@ The file has the main loop of the game
 import pygame
 
 from config import FPS, HEIGHT, TITLE, WIDTH
-from src.game_events import reverse_ships_if_edge_hit
+from src.game_events import reverse_ship_if_obstacle_hit, reverse_ships_if_edge_hit
+from src.gui import create_center_obstacle, draw_frame
 from src.objects import Ship
 
 def gameloop() -> None:
@@ -25,10 +26,12 @@ def gameloop() -> None:
     clock = pygame.time.Clock()
 
     ships = pygame.sprite.Group(
-        Ship(120, 200, speed_x=3),
-        Ship(220, 200, speed_x=3),
-        Ship(320, 200, speed_x=3),
+        Ship(120, 310, speed_x=3),
+        Ship(220, 310, speed_x=3),
+        Ship(320, 310, speed_x=3),
     )
+
+    obstacle = create_center_obstacle()
 
     running = True
     while running:
@@ -39,10 +42,10 @@ def gameloop() -> None:
                 running = False
 
         ships.update()
+        reverse_ship_if_obstacle_hit(ships, obstacle)
         reverse_ships_if_edge_hit(ships, WIDTH)
 
-        screen.fill("black")
-        ships.draw(screen)
+        draw_frame(screen, ships, obstacle)
         pygame.display.flip()
 
     pygame.quit()
