@@ -1,4 +1,7 @@
-"""Game event helpers for handling shared gameplay rules."""
+"""Game event helpers for handling shared gameplay rules.
+
+Authors: Irjan Evertsen and Emil Olsen-Kristiansen
+"""
 
 from __future__ import annotations
 

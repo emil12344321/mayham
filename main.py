@@ -1,8 +1,9 @@
-""" 
+"""
 Base of the code project
 This is the file to run for the project to run
 The file has the main loop of the game
 
+Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 import pygame

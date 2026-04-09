@@ -1,4 +1,4 @@
-""" 
+"""
 This file has all objects of the game and the class system for them
 
 
@@ -10,6 +10,8 @@ sprite.remove -> removes from group
 sprite.update -> updates behaviour
 sprite.add -> adds to group
 sprite.kill -> removes from all groups
+
+Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 import pygame

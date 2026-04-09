@@ -1,4 +1,7 @@
-"""GUI helpers for creating and drawing game visuals."""
+"""GUI helpers for creating and drawing game visuals.
+
+Authors: Irjan Evertsen and Emil Olsen-Kristiansen
+"""
 
 from __future__ import annotations
 

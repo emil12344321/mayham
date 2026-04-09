@@ -3,6 +3,7 @@ This file has the global configuration constants:
 
 includes: screen size, gravitiy constant, starting fuel
 
+Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 
