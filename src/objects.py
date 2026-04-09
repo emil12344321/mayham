@@ -18,7 +18,24 @@ import pygame
 
 class Ship(pygame.sprite.Sprite):
 
-    # constuctor, pass in x and y coordinates
-    def __init__(self, width, height):
-        ## call parent constructor
-        pygame.sprite.Sprite.__init__(self)
+    # constructor, pass in x and y coordinates
+    def __init__(self, x: int, y: int, speed_x: int = 3, size: tuple[int, int] = (40, 20)):
+        # Call parent constructor.
+        super().__init__()
+
+        self.image = pygame.Surface(size)
+        self.image.fill("white")
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.speed_x = speed_x
+
+    def update(self) -> None:
+        """Move the ship horizontally based on its current direction."""
+        self.rect.x += self.speed_x
+
+    def hits_screen_edge(self, screen_width: int) -> bool:
+        """Return True if the ship touches either horizontal screen edge."""
+        return self.rect.left <= 0 or self.rect.right >= screen_width
+
+    def reverse_direction(self) -> None:
+        """Reverse the horizontal direction."""
+        self.speed_x *= -1
