@@ -7,12 +7,13 @@ The file has the main loop of the game
 
 import pygame
 
+from player import Player
+
 from config import(
     WIDTH,
     HEIGHT,
     FPS,
     TITLE,
-    BACKGROUND_IMAGE,
     GRAVITY,
     STARTING_FUEL,
 )
@@ -28,6 +29,33 @@ def gameloop() -> None:
     """
 
     pygame.init()
+
+    screen = pygame.display.set_mode((WIDTH,HEIGHT))
+    pygame.display.set_caption(TITLE)
+
+    clock = pygame.time.Clock()
+
+    player = Player(WIDTH // 2, HEIGHT // 2)
+
+    running = True
+    while running:
+        clock.tick(FPS)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+
+        player(update)
+        screen.fill("black")
+        
+
+
+
+
+        pygame.display.flip()
+
+    pygame.quit()
 
 
 
