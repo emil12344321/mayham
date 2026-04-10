@@ -7,7 +7,7 @@ Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 import pygame
-
+from src.player import Player
 from config import FPS, HEIGHT, TITLE, WIDTH
 from src.game_events import reverse_ship_if_obstacle_hit, reverse_ships_if_edge_hit
 from src.gui import create_center_obstacle, draw_frame
@@ -25,6 +25,8 @@ def gameloop() -> None:
     pygame.display.set_caption(TITLE)
 
     clock = pygame.time.Clock()
+
+
 
     ships = pygame.sprite.Group(
         Ship(120, 310, speed_x=3),
