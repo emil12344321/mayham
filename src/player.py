@@ -110,7 +110,7 @@ class Player(Ship):
             self.x = old_x
             self.y = old_y
             self.vx = -self.vx
-            self.vy = -self.vy
+            self.vy = -self.vy + 1
             self.update_rect()
 
 
