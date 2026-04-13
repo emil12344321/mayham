@@ -28,7 +28,9 @@ def gameloop() -> None:
 
     clock = pygame.time.Clock()
 
-    player = Player(WIDTH // 2, HEIGHT // 2)
+    obstacle = create_center_obstacle()
+
+    player = Player(WIDTH // 4, HEIGHT // 4)
     running = True
     while running:
         clock.tick(FPS)
@@ -37,16 +39,23 @@ def gameloop() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
+        ## make obstacle
+        
 
         ## should probably be player1.update(keys) and player2.... 
         keys = pygame.key.get_pressed()
 
-        player.update(keys)
+        player.update(keys, obstacle)
+
+
 
         
 
         screen.fill("black")
+        obstacle.draw(screen)
         player.draw(screen)
+        
+
         pygame.display.flip()
 
     pygame.quit()
