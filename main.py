@@ -9,9 +9,11 @@ Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 import pygame
 from src.player import Player
 from config import FPS, HEIGHT, TITLE, WIDTH
-from src.game_events import reverse_ship_if_obstacle_hit, reverse_ships_if_edge_hit
 from src.gui import create_center_obstacle, draw_frame
+##from src.game_events import reverse_ships_if_edge_hit
 from src.objects import Ship
+from src.player import Player
+
 
 def gameloop() -> None:
     """ Run the main game loop.
@@ -26,16 +28,7 @@ def gameloop() -> None:
 
     clock = pygame.time.Clock()
 
-
-
-    ships = pygame.sprite.Group(
-        Ship(120, 310, speed_x=3),
-        Ship(220, 310, speed_x=3),
-        Ship(320, 310, speed_x=3),
-    )
-
-    obstacle = create_center_obstacle()
-
+    player = Player(WIDTH // 2, HEIGHT // 2)
     running = True
     while running:
         clock.tick(FPS)
@@ -44,11 +37,16 @@ def gameloop() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
-        ships.update()
-        reverse_ship_if_obstacle_hit(ships, obstacle)
-        reverse_ships_if_edge_hit(ships, WIDTH)
 
-        draw_frame(screen, ships, obstacle)
+        ## should probably be player1.update(keys) and player2.... 
+        keys = pygame.key.get_pressed()
+
+        player.update(keys)
+
+        
+
+        screen.fill("black")
+        player.draw(screen)
         pygame.display.flip()
 
     pygame.quit()
