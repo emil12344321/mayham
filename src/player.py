@@ -114,7 +114,6 @@ class Player(Ship):
             self.update_rect()
 
 
-
     def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect)
 
