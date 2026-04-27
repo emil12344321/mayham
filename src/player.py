@@ -63,25 +63,36 @@ class Player(Ship):
         pygame.draw.rect(surface, "white", (17, 10, 6, 6))
         return surface
     
-    ## todo, maybe make this more clean
+    def collision(self, obstacle) -> bool:
+        pointx = max(obstacle.rect.left, min(self.x, obstacle.rect.right))
+        pointy = max(obstacle.rect.top, min(self.y, obstacle.rect.bottom))
+
+        dx = self.x - pointx
+        dy = self.y - pointy
+
+        return (dx * dx + dy * dy) < (self.radius * self.radius)
+
+
+    # changed to use circle hitbox
     def inside_screen(self) -> None:
-        if self.x < 0:
-            self.x = 0
+        if self.x - self.radius < 0:
+            self.x = self.radius
             self.vx = -self.vx / 4
 
-        if self.x > WIDTH:
-            self.x = WIDTH
+        if self.x + self.radius > WIDTH:
+            self.x = WIDTH - self.radius
             self.vx = -self.vx / 4
-        
-        if self.y < 0:
-            self.y = 0
+
+        if self.y - self.radius < 0:
+            self.y = self.radius
             self.vy = -self.vy / 4
-        
-        if self.y > HEIGHT:
-            self.y = HEIGHT
+
+        if self.y + self.radius > HEIGHT:
+            self.y = HEIGHT - self.radius
             self.vy = -self.vy / 4
 
         self.update_rect()
+
 
     def update(self, keys, obstacles, players) -> None:
         #rotation
@@ -103,12 +114,17 @@ class Player(Ship):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.update_rect()
 
-        if pygame.sprite.spritecollideany(self, obstacles):
-            self.undo_movement(old_x, old_y)
-
-        for player in players:
-            if player != self and self.rect.colliderect(player.rect):
+        for obstacle in obstacles:
+            if self.collision(obstacle):
                 self.undo_movement(old_x, old_y)
+
+        sprite_collision = pygame.sprite.spritecollide(self, players, False, pygame.sprite.collide_circle)
+
+
+        for player in sprite_collision:
+            if player != self:
+                self.undo_movement(old_x, old_y)
+                break
 
 
     def undo_movement(self, old_x, old_y) -> None:
