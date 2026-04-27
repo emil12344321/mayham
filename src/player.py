@@ -24,6 +24,12 @@ import pygame
 from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT
 from src.objects import Ship, Obstacle
 
+"""
+Todo
+make code more object oriented. could probably use the same 
+class and some form of polymorhpism
+
+"""
 
 
 class Player1(Ship):
