@@ -3,21 +3,6 @@ This file has the player script of the game
 
 """
 
-
-
-## should have :
-"""
-player pos (self.x and self.y)
-velocity
-angle (self.angle)
-ship image (self.image)
-hitbox (self.x, self.y)
-update()
-draw()
-"""
-
-        
-
 import math
 import pygame
 
@@ -123,6 +108,7 @@ class Player1(Ship):
     def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect)
 
+
 class Player2(Ship):
     def __init__(self, x: float, y: float) -> None:
         super().__init__(x,y, (40,40))
@@ -213,5 +199,3 @@ class Player2(Ship):
 
     def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect)
-
-

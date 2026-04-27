@@ -14,7 +14,6 @@ from src.gui import create_center_obstacle, draw_frame
 from src.objects import Ship
 
 
-
 def gameloop() -> None:
     """ Run the main game loop.
 
@@ -42,7 +41,6 @@ def gameloop() -> None:
 
         ## make obstacle
         
-
         ## should probably be player1.update(keys) and player2.... 
         keys = pygame.key.get_pressed()
 
@@ -67,4 +65,3 @@ def gameloop() -> None:
 if __name__ == "__main__":
     # run game
     gameloop()
-
