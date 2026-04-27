@@ -32,6 +32,12 @@ class Obstacle(pygame.sprite.Sprite):
         """Draw the obstacle on screen."""
         screen.blit(self.image, self.rect)
 
+"""
+class Bullet(pygame.sprite.Sprite):
+
+    def __init__(self, x: int, y: int, speed_x: int = 20, size: tuple[int, int] = (5,2)):
+        super().__init__()
+"""
 
 
 class Ship(pygame.sprite.Sprite):
