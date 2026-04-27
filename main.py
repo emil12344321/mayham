@@ -7,12 +7,12 @@ Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 import pygame
-from src.player import Player
+from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
 from src.gui import create_center_obstacle, draw_frame
 ##from src.game_events import reverse_ships_if_edge_hit
 from src.objects import Ship
-from src.player import Player
+
 
 
 def gameloop() -> None:
@@ -30,7 +30,8 @@ def gameloop() -> None:
 
     obstacle = create_center_obstacle()
 
-    player = Player(WIDTH // 4, HEIGHT // 4)
+    player1 = Player1(WIDTH // 4, HEIGHT // 4)
+    player2 = Player2(WIDTH // 3/4, HEIGHT // 3/4)
     running = True
     while running:
         clock.tick(FPS)
@@ -45,15 +46,16 @@ def gameloop() -> None:
         ## should probably be player1.update(keys) and player2.... 
         keys = pygame.key.get_pressed()
 
-        player.update(keys, obstacle)
-
+        player1.update(keys, obstacle)
+        player2.update(keys, obstacle)
 
 
         
 
         screen.fill("black")
         obstacle.draw(screen)
-        player.draw(screen)
+        player1.draw(screen)
+        player2.draw(screen)
         
 
         pygame.display.flip()
