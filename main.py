@@ -31,7 +31,17 @@ def gameloop() -> None:
     obstacle = create_center_obstacle()
 
     player1 = Player1(WIDTH // 4, HEIGHT // 4)
-    player2 = Player2(WIDTH // 3/4, HEIGHT // 3/4)
+    player2 = Player2(WIDTH * 3 // 4, HEIGHT *3 // 4)
+
+    players = pygame.sprite.Group()
+    players.add(player1, player2)
+
+    obstacles = pygame.sprite.Group()
+    obstacles.add(obstacle)
+
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(obstacle, player1, player2)
+
     running = True
     while running:
         clock.tick(FPS)
@@ -46,16 +56,13 @@ def gameloop() -> None:
         ## should probably be player1.update(keys) and player2.... 
         keys = pygame.key.get_pressed()
 
-        player1.update(keys, obstacle)
-        player2.update(keys, obstacle)
+        players.update(keys, obstacles, players)
 
 
         
 
         screen.fill("black")
-        obstacle.draw(screen)
-        player1.draw(screen)
-        player2.draw(screen)
+        all_sprites.draw(screen)
         
 
         pygame.display.flip()

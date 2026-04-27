@@ -63,7 +63,27 @@ class Player(Ship):
         pygame.draw.rect(surface, "white", (17, 10, 6, 6))
         return surface
     
-    def update(self, keys, obstacle: Obstacle) -> None:
+    ## todo, maybe make this more clean
+    def inside_screen(self) -> None:
+        if self.x < 0:
+            self.x = 0
+            self.vx = -self.vx / 4
+
+        if self.x > WIDTH:
+            self.x = WIDTH
+            self.vx = -self.vx / 4
+        
+        if self.y < 0:
+            self.y = 0
+            self.vy = -self.vy / 4
+        
+        if self.y > HEIGHT:
+            self.y = HEIGHT
+            self.vy = -self.vy / 4
+
+        self.update_rect()
+
+    def update(self, keys, obstacles, players) -> None:
         #rotation
         old_x = self.x
         old_y = self.y
@@ -74,6 +94,8 @@ class Player(Ship):
         #movement
         self.move()
 
+        self.inside_screen()
+
         #input
         self.handle_input(keys)
 
@@ -81,30 +103,20 @@ class Player(Ship):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.update_rect()
 
-        # limits
-        if self.x < 0:
-            self.x = 0
-            self.vx = 0
+        if pygame.sprite.spritecollideany(self, obstacles):
+            self.undo_movement(old_x, old_y)
 
-        if self.x > WIDTH:
-            self.x = WIDTH
-            self.vx = 0
+        for player in players:
+            if player != self and self.rect.colliderect(player.rect):
+                self.undo_movement(old_x, old_y)
 
-        if self.y < 0:
-            self.y = 0
-            self.vy = 0
 
-        if self.y > HEIGHT:
-            self.y = HEIGHT
-            self.vy = 0
-
-        #collision
-        if self.rect.colliderect(obstacle.rect):
-            self.x = old_x
-            self.y = old_y
-            self.vx = -self.vx
-            self.vy = -self.vy + 1
-            self.update_rect()
+    def undo_movement(self, old_x, old_y) -> None:
+        self.x = old_x
+        self.y = old_y
+        self.vx = -self.vx
+        self.vy = -self.vy + 1
+        self.update_rect()
 
     def handle_input(self, keys) -> None:
         if keys[self.controls["left"]]:
