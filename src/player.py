@@ -22,7 +22,7 @@ import math
 import pygame
 
 from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT
-from src.objects import Ship, Obstacle
+from src.objects import Ship, Obstacle, Bullet
 
 """
 Todo
@@ -50,6 +50,9 @@ class Player(Ship):
         self.gravity = GRAVITY
         self.fuel = STARTING_FUEL
         self.radius = 18
+
+        self.bullet_cooldown = 300 # miliseconds
+        self.last_shot = 0
 
         # update player image
         self.original_image = self.create_ship_surface()
@@ -93,8 +96,30 @@ class Player(Ship):
 
         self.update_rect()
 
+    def shoot(self, bullets) -> None:
+        time = pygame.time.get_ticks()
 
-    def update(self, keys, obstacles, players) -> None:
+        if time - self.last_shot < self.bullet_cooldown:
+            return
+        
+
+        bullet = Bullet(self.x, self.y, self.angle, self)
+        bullets.add(bullet)
+
+        self.last_shot = time
+
+    ### Fuel methods, TODO Change these when the needs object is added, this logic is temporery
+    def pick_up_fuel(self, fuel_cans) -> None:
+        self.fuel = STARTING_FUEL
+
+        fuel_touch = pygame.sprite.spritecollide(self, fuel_cans, True, pygame.sprite.collide_circle)
+
+        ## change this with needs object
+        if fuel_touch:
+            self.fuel = STARTING_FUEL
+
+
+    def update(self, keys, obstacles, players, bullets, fuel_cans) -> None:
         #rotation
         old_x = self.x
         old_y = self.y
@@ -102,13 +127,16 @@ class Player(Ship):
         # gravity
         self.vy += self.gravity
 
+        # check for fuel
+        self.pick_up_fuel(fuel_cans)
+
         #movement
         self.move()
 
         self.inside_screen()
 
         #input
-        self.handle_input(keys)
+        self.handle_input(keys, bullets)
 
         # rotate playerimage
         self.image = pygame.transform.rotate(self.original_image, self.angle)
@@ -134,7 +162,7 @@ class Player(Ship):
         self.vy = -self.vy + 1
         self.update_rect()
 
-    def handle_input(self, keys) -> None:
+    def handle_input(self, keys, bullets) -> None:
         if keys[self.controls["left"]]:
             self.angle += self.rotation_speed
 
@@ -146,6 +174,9 @@ class Player(Ship):
             self.vx -= (math.sin(radians) * self.thrust)/3
             self.vy -= math.cos(radians) * self.thrust
             # self.fuel -= 1
+        
+        if keys[self.controls["shoot"]]:
+            self.shoot(bullets)
 
 
     def draw(self, screen: pygame.Surface) -> None:
@@ -158,7 +189,7 @@ class Player1(Player):
             "left": pygame.K_LEFT,
             "right": pygame.K_RIGHT,
             "up": pygame.K_UP,
-            # add shoot later
+            "shoot": pygame.K_RSHIFT,
         }
 
         super().__init__(x, y, "blue", controls)
@@ -171,7 +202,7 @@ class Player2(Player):
             "left": pygame.K_a,
             "right": pygame.K_d,
             "up": pygame.K_w,
-            # add shoot later
+            "shoot": pygame.K_SPACE,
         }
 
         super().__init__(x, y, "red", controls)

@@ -6,12 +6,21 @@ The file has the main loop of the game
 Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
+"""
+TODO list
+make sure all functions and methods have type hints and doccstrings
+clean up duplicate code from merges and unused code
+check game feel against requirements, is accelerations implemented correctly?
+add needs object and visual health + fuel
+"""
+
+
 import pygame
 from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
-from src.gui import create_center_obstacle, draw_frame
+from src.gui import create_center_obstacle, create_fuelcan
 ##from src.game_events import reverse_ships_if_edge_hit
-from src.objects import Ship
+from src.objects import Ship, Bullet
 
 
 
@@ -39,8 +48,16 @@ def gameloop() -> None:
     obstacles = pygame.sprite.Group()
     obstacles.add(obstacle)
 
+    bullets = pygame.sprite.Group()
+
+    fuel_cans = pygame.sprite.Group()
+
+
     all_sprites = pygame.sprite.Group()
-    all_sprites.add(obstacle, player1, player2)
+    all_sprites.add(obstacle, player1, player2, fuel_cans)
+
+    time_from_fuel_spawn = pygame.time.get_ticks()
+    fuel_spawn_time = 10000
 
     running = True
     while running:
@@ -56,13 +73,25 @@ def gameloop() -> None:
         ## should probably be player1.update(keys) and player2.... 
         keys = pygame.key.get_pressed()
 
-        players.update(keys, obstacles, players)
+        players.update(keys, obstacles, players, bullets, fuel_cans)
+        bullets.update(players, obstacles)
+
+        current_time = pygame.time.get_ticks()
+
+        if len(fuel_cans) == 0 and current_time - time_from_fuel_spawn > fuel_spawn_time:
+            fuel = create_fuelcan()
+            fuel_cans.add(fuel)
+            all_sprites.add(fuel)
+            time_from_fuel_spawn = current_time
+
+        all_sprites.add(bullets)
 
 
         
 
         screen.fill("black")
         all_sprites.draw(screen)
+
         
 
         pygame.display.flip()
