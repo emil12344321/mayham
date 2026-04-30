@@ -21,7 +21,7 @@ draw()
 import math
 import pygame
 
-from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT
+from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH
 from src.objects import Ship, Obstacle
 
 """
@@ -47,9 +47,11 @@ class Player(Ship):
         #player constants
         self.rotation_speed = 3
         self.thrust = THRUST
-        self.gravity = GRAVITY
-        self.fuel = STARTING_FUEL
         self.radius = 18
+        self.gravity = GRAVITY
+
+        # holder fuel og health for enhver spiller
+        self.needs = Needs()
 
         # update player image
         self.original_image = self.create_ship_surface()
@@ -175,3 +177,10 @@ class Player2(Player):
         }
 
         super().__init__(x, y, "red", controls)
+
+
+class Needs:
+    "skal bare holde status for enhver spiller"
+    def __init__(self) -> None:
+        self.fuel = STARTING_FUEL
+        self.health = STARTING_HEALTH
