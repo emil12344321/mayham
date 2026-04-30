@@ -18,7 +18,9 @@ add needs object and visual health + fuel
 import pygame
 from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
-from src.gui import create_center_obstacle, create_fuelcan
+
+from src.gui import NeedsDisplay, create_center_obstacle, create_fuelcan
+
 ##from src.game_events import reverse_ships_if_edge_hit
 from src.objects import Ship, Bullet
 
@@ -41,6 +43,7 @@ def gameloop() -> None:
 
     player1 = Player1(WIDTH // 4, HEIGHT // 4)
     player2 = Player2(WIDTH * 3 // 4, HEIGHT *3 // 4)
+    needs_display = NeedsDisplay(player1, player2)
 
     players = pygame.sprite.Group()
     players.add(player1, player2)
@@ -92,6 +95,7 @@ def gameloop() -> None:
         screen.fill("black")
         all_sprites.draw(screen)
 
+        needs_display.draw(screen)
         
 
         pygame.display.flip()
