@@ -11,7 +11,6 @@ import math
 import pygame
 
 from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH, FUEL_COOLDOWN
-from src.game_events import wall_or_obstacle_damage
 from src.objects import Ship, Obstacle, Bullet
 
 
@@ -116,7 +115,7 @@ class Player(Ship):
             self.needs.add_fuel(STARTING_FUEL // 2)
 
 
-    def update(self, keys, obstacles, players, bullets, fuel_cans) -> None:
+    def update(self, keys, obstacles, players, bullets, fuel_cans, game_events) -> None:
         """Updates the player every frame
         
         Updates gravity, movement, screen bounds, input, image rotation,
@@ -139,7 +138,7 @@ class Player(Ship):
         moved_y = self.y
         self.inside_screen()
         if self.x != moved_x or self.y != moved_y:
-            self.take_wall_or_obstacle_damage(players)
+            self.take_wall_or_obstacle_damage(players, game_events)
 
         #input
         self.handle_input(keys, bullets)
@@ -151,7 +150,7 @@ class Player(Ship):
         for obstacle in obstacles:
             if self.collision(obstacle):
                 self.undo_movement(old_x, old_y)
-                self.take_wall_or_obstacle_damage(players)
+                self.take_wall_or_obstacle_damage(players, game_events)
 
         sprite_collision = pygame.sprite.spritecollide(self, players, False, pygame.sprite.collide_circle)
 
@@ -161,14 +160,14 @@ class Player(Ship):
                 self.undo_movement(old_x, old_y)
                 break
 
-    def take_wall_or_obstacle_damage(self, players) -> None:
+    def take_wall_or_obstacle_damage(self, players, game_events) -> None:
         current_time = pygame.time.get_ticks()
 
         if current_time - self.last_wall_damage < self.wall_damage_cooldown:
             return
 
         opponent = self.get_opponent(players)
-        wall_or_obstacle_damage(self, opponent)
+        game_events.wall_or_obstacle_damage(self, opponent)
         self.last_wall_damage = current_time
 
     def get_opponent(self, players):

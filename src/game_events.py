@@ -1,188 +1,129 @@
 """
-Game event logic
+Game event logic.
 
-This file contains the GameEvents class which handles bulletdamage, player death,
-winner state and crash penalties
+This file contains helpers and the GameEvents class, which handles bullet damage,
+player death, winner state, scoring, and crash penalties.
 
 Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 from __future__ import annotations
-from config import BULLET_DAMAGE
 
 import pygame
 
-<<<<<<< HEAD
-game_winner_player = None
-game_winner_time = None
-player_scores = {
-    "Player1": 0,
-    "Player2": 0,
-}
-=======
+from config import BULLET_DAMAGE, WALL_DAMAGE
+
+
 class GameEvents:
-	"""Handle shared gameplay events
-	
-	Damage, death, winning
-	"""
+    """Handle shared gameplay events."""
 
-	def __init__(self) -> None:
-		"""Create a game event handler, no winner at the start"""
-		self.game_winner_player = None
-		self.game_winner_time = None
+    player_scores = {
+        "Player1": 0,
+        "Player2": 0,
+    }
 
-	def bullet_hit_player(self, bullet, player) -> None:
-		"""Updates the player health when hit by a bullet"""
-		player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
-		bullet.kill()
+    def __init__(self) -> None:
+        """Create a game event handler, no winner at the start."""
+        self.game_winner_player = None
+        self.game_winner_time = None
 
-		if player.needs.health == 0 and player.is_alive:
-			self.player_died(player, bullet.owner)
+    def bullet_hit_player(self, bullet, player) -> None:
+        """Update player health when hit by a bullet."""
+        player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
+        bullet.kill()
 
-	def player_died(self, player, killer) -> None:
-		"""Mark a player as dead and pass the killer to the winner handler."""
-		player.is_alive = False
-		player.kill()
-		self.game_winner(killer)
+        if player.needs.health == 0 and player.is_alive:
+            self.player_died(player, bullet.owner)
 
-	def get_game_winner(self):
-		"""Return the winner if the game has ended."""
-		return self.game_winner_player
+    def wall_or_obstacle_damage(self, player, killer) -> None:
+        """Damage a player after hitting a wall or obstacle."""
+        player.needs.health = max(0, player.needs.health - WALL_DAMAGE)
 
-	def game_winner(self, winner) -> None:
-		"""Store the winner and when the game ended."""
-		global game_winner_player, game_winner_time
+        if player.needs.health == 0 and player.is_alive:
+            self.player_died(player, killer)
 
-		game_winner_player = winner
-		game_winner_time = pygame.time.get_ticks()
+    def player_died(self, player, killer) -> None:
+        """Mark a player as dead and pass the killer to the winner handler."""
+        player.is_alive = False
+        player.kill()
+        self.game_winner(killer)
 
-	def get_game_winner_time(self):
-		"""Return when the winner was decided."""
-		return self.game_winner_time
+    def game_winner(self, winner) -> None:
+        """Store the winner, update score and when the game ended."""
+        if self.game_winner_player is not None:
+            return
 
-	def reset_game_winner(self) -> None:
-		"""Clear winner state before a new game starts."""
-		global game_winner_player, game_winner_time
+        self.game_winner_player = winner
+        self.game_winner_time = pygame.time.get_ticks()
 
-		game_winner_player = None
-		game_winner_time = None
+        if winner is None:
+            return
 
+        winner_name = winner.__class__.__name__
+        if winner_name in self.player_scores:
+            self.player_scores[winner_name] += 1
 
->>>>>>> origin/2player
+    def get_game_winner(self):
+        """Return the winner if the game has ended."""
+        return self.game_winner_player
 
+    def get_game_winner_time(self):
+        """Return when the winner was decided."""
+        return self.game_winner_time
 
-def reverse_ship_if_obstacle_hit(ships: pygame.sprite.Group, obstacle: pygame.sprite.Sprite) -> bool:
-	"""Reverse only ships that collide with the obstacle.
+    def reset_game_winner(self) -> None:
+        """Clear winner state before a new round starts."""
+        self.game_winner_player = None
+        self.game_winner_time = None
 
-	Returns True if at least one ship changed direction this frame.
-	"""
-	hit_any_ship = False
+    @staticmethod # brukes bare for å unngå å bruke objektet ()self)
+    def reverse_ship_if_obstacle_hit(ships: pygame.sprite.Group, obstacle: pygame.sprite.Sprite) -> bool:
+        """Reverse only ships that collide with the obstacle.
 
-	for ship in ships:
-		if not hasattr(ship, "rect"):
-			continue
-		if not hasattr(ship, "reverse_direction"):
-			continue
-		if not hasattr(obstacle, "rect"):
-			continue
+        Returns True if at least one ship changed direction this frame.
+        """
+        hit_any_ship = False
 
-		if ship.rect.colliderect(obstacle.rect):
-			hit_any_ship = True
+        for ship in ships:
+            if not hasattr(ship, "rect"):
+                continue
+            if not hasattr(ship, "reverse_direction"):
+                continue
+            if not hasattr(obstacle, "rect"):
+                continue
 
-			# Push ship outside the obstacle before reversing to avoid oscillation.
-			if hasattr(ship, "speed_x") and ship.speed_x >= 0:
-				ship.rect.right = obstacle.rect.left
-			else:
-				ship.rect.left = obstacle.rect.right
+            if ship.rect.colliderect(obstacle.rect):
+                hit_any_ship = True
 
-			ship.reverse_direction()
+                if hasattr(ship, "speed_x") and ship.speed_x >= 0:
+                    ship.rect.right = obstacle.rect.left
+                else:
+                    ship.rect.left = obstacle.rect.right
 
-	return hit_any_ship
+                ship.reverse_direction()
 
+        return hit_any_ship
 
-def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> bool:
-	"""Reverse all ships when any ship touches a horizontal edge.
-
-	Returns True if a direction change was applied this frame.
-	"""
-	should_reverse = any(
-		hasattr(ship, "hits_screen_edge") and ship.hits_screen_edge(screen_width)
-		for ship in ships
-	)
-
-	if should_reverse:
-		for ship in ships:
-			if hasattr(ship, "reverse_direction"):
-				ship.reverse_direction()
-
-<<<<<<< HEAD
-	return should_reverse
+    @staticmethod # brukes bare for å unngå å bruke objektet ()self)
+    def get_scores():
+        """Return a copy of the current player scores."""
+        return GameEvents.player_scores.copy()
 
 
-def bullet_hit_player(bullet, player) -> None:
-    """bullet give damage"""
-    from config import BULLET_DAMAGE
+    @staticmethod # brukes bare for å unngå å bruke objektet ()self)
+    def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> bool:
+        """Reverse all ships when any ship touches a horizontal edge.
 
-    player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
-    bullet.kill()
+        Returns True if a direction change was applied this frame.
+        """
+        should_reverse = any(
+            hasattr(ship, "hits_screen_edge") and ship.hits_screen_edge(screen_width)
+            for ship in ships
+        )
 
-    if player.needs.health == 0 and player.is_alive:
-        player_died(player, bullet.owner)
+        if should_reverse:
+            for ship in ships:
+                if hasattr(ship, "reverse_direction"):
+                    ship.reverse_direction()
 
-
-def wall_or_obstacle_damage(player, killer) -> None:
-    """Damage a player after hitting a wall or obstacle."""
-    from config import WALL_DAMAGE
-
-    player.needs.health = max(0, player.needs.health - WALL_DAMAGE)
-
-    if player.needs.health == 0 and player.is_alive:
-        player_died(player, killer)
-
-
-def player_died(player, killer) -> None:
-    """Mark a player as dead and pass the killer to the winner handler."""
-    player.is_alive = False
-    player.kill()
-    game_winner(killer)
-
-
-def game_winner(winner) -> None:
-    """Store the winner, update score and when the game ended."""
-    global game_winner_player, game_winner_time
-
-    if game_winner_player is not None:
-        return
-
-    game_winner_player = winner
-    game_winner_time = pygame.time.get_ticks()
-
-    winner_name = winner.__class__.__name__
-    if winner_name in player_scores:
-        player_scores[winner_name] += 1
-
-
-def get_game_winner():
-    """Return the winner if the game has ended."""
-    return game_winner_player
-
-
-def get_game_winner_time():
-    """Return when the winner was decided."""
-    return game_winner_time
-
-
-def get_scores():
-    """Return a copy of the current player scores."""
-    return player_scores.copy()
-
-
-def reset_game_winner() -> None:
-    """Clear winner state before a new game starts."""
-    global game_winner_player, game_winner_time
-
-    game_winner_player = None
-    game_winner_time = None
-=======
-	return should_reverse
->>>>>>> origin/2player
+        return should_reverse

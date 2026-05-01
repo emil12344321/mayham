@@ -14,7 +14,7 @@ import pygame
 import random
 
 from config import HEIGHT, OBSTACLE_COLOR, OBSTACLE_SIZE, WIDTH, FUEL_COLOR, FUEL_SIZE
-from src.game_events import get_scores
+from src.game_events import GameEvents
 from src.objects import Obstacle, Fuel
 
 class ObjectFactory:
@@ -127,7 +127,7 @@ class Scoreboard:
 
 	def draw(self, screen: pygame.Surface) -> None:
 		"""Draw player scores at the top center of the screen."""
-		scores = get_scores()
+		scores = GameEvents.get_scores()
 		text = f"Player 1: {scores['Player1']}  Player 2: {scores['Player2']}"
 		text_surface = self.font.render(text, True, self.text_color)
 		text_rect = text_surface.get_rect(midtop=(WIDTH // 2, 20))
