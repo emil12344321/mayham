@@ -79,3 +79,30 @@ class NeedsDisplay:
 		else:
 			text_rect.topleft = position
 		screen.blit(text_surface, text_rect)
+
+
+class WinnerAnnouncement:
+	"""Display the winning player in a centered box."""
+
+	def __init__(self, winner) -> None:
+		self.winner = winner
+		self.font = pygame.font.SysFont(None, 52)
+		self.box_color = (25, 25, 25)
+		self.border_color = (255, 255, 255)
+		self.text_color = (255, 255, 255)
+
+	def draw(self, screen: pygame.Surface) -> None:
+		"""Draw the winner announcement."""
+		winner_name = winner_to_text(self.winner)
+		text_surface = self.font.render(f"Winner is {winner_name}", True, self.text_color)
+		text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
+		box_rect = text_rect.inflate(80, 50)
+		pygame.draw.rect(screen, self.box_color, box_rect)
+		pygame.draw.rect(screen, self.border_color, box_rect, 3)
+		screen.blit(text_surface, text_rect)
+
+
+def winner_to_text(winner) -> str:
+	"""Return a readable winner name."""
+	return winner.__class__.__name__

@@ -21,7 +21,7 @@ draw()
 import math
 import pygame
 
-from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH
+from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH, FUEL_COOLDOWN
 from src.objects import Ship, Obstacle, Bullet
 
 """
@@ -52,6 +52,11 @@ class Player(Ship):
 
         # holder fuel og health for enhver spiller
         self.needs = Needs()
+        self.is_alive = True
+
+        ## fuel cooldown makes the fuel drain less time per frame
+        self.fuel_cooldown = FUEL_COOLDOWN
+        self.last_fuel = 0
 
         self.bullet_cooldown = 300 # miliseconds
         self.last_shot = 0
@@ -112,13 +117,11 @@ class Player(Ship):
 
     ### Fuel methods, TODO Change these when the needs object is added, this logic is temporery
     def pick_up_fuel(self, fuel_cans) -> None:
-        self.fuel = STARTING_FUEL
-
         fuel_touch = pygame.sprite.spritecollide(self, fuel_cans, True, pygame.sprite.collide_circle)
 
         ## change this with needs object
         if fuel_touch:
-            self.fuel = STARTING_FUEL
+            self.needs.add_fuel(STARTING_FUEL // 2)
 
 
     def update(self, keys, obstacles, players, bullets, fuel_cans) -> None:
@@ -171,11 +174,16 @@ class Player(Ship):
         if keys[self.controls["right"]]:
             self.angle -= self.rotation_speed
 
-        if keys[self.controls["up"]]:
+        if keys[self.controls["up"]] and self.needs.has_fuel():
             radians = math.radians(self.angle)
             self.vx -= (math.sin(radians) * self.thrust)/3
             self.vy -= math.cos(radians) * self.thrust
-            # self.fuel -= 1
+            
+            curr_time = pygame.time.get_ticks()
+
+            if curr_time - self.last_fuel >= self.fuel_cooldown:
+                self.needs.use_fuel(1)
+                self.last_fuel = curr_time
         
         if keys[self.controls["shoot"]]:
             self.shoot(bullets)
@@ -211,7 +219,21 @@ class Player2(Player):
 
 
 class Needs:
-    "skal bare holde status for enhver spiller"
+    "Holder status for enhver spiller"
     def __init__(self) -> None:
+        self.max_fuel = STARTING_FUEL
         self.fuel = STARTING_FUEL
         self.health = STARTING_HEALTH
+
+    def has_fuel(self) -> bool:
+        """Returns true if the player still has fuel"""
+        if self.fuel > 0:
+            return True
+    
+    def use_fuel(self, amount: int) -> None:
+        """Method for player using fuel, used by thrust"""
+        self.fuel = max(0, (self.fuel - amount))
+
+    def add_fuel(self, amount: int) -> None:
+        """Adds fuel to the player by the given amount"""
+        self.fuel = min(self.max_fuel, self.fuel + amount)
