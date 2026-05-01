@@ -104,7 +104,3 @@ def reset_game_winner() -> None:
     game_winner_player = None
     game_winner_time = None
 
-
-def game_vinner(winner) -> None:
-    """Norwegian alias for game_winner."""
-    game_winner(winner)

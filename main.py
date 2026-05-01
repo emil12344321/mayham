@@ -6,14 +6,6 @@ The file has the main loop of the game
 Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
-"""
-TODO list
-make sure all functions and methods have type hints and doccstrings
-clean up duplicate code from merges and unused code
-check game feel against requirements, is accelerations implemented correctly?
-add needs object and visual health + fuel
-"""
-
 
 import pygame
 from src.game_events import get_game_winner, get_game_winner_time, reset_game_winner
@@ -22,107 +14,150 @@ from config import FPS, HEIGHT, TITLE, WIDTH
 
 from src.gui import NeedsDisplay, WinnerAnnouncement, create_center_obstacle, create_fuelcan
 
-##from src.game_events import reverse_ships_if_edge_hit
-from src.objects import Ship, Bullet
 
-
-
-def gameloop() -> None:
-    """ Run the main game loop.
-
-    The loop sets up pygame, loads assets, processes events, updates screen and renders the screen
+class Game():
     """
+    Main game object. The game object sets up pygame, loads assets, processes events,
+    updates screen and renders the screen
+    """
+    def __init__(self) -> None:
+        """Initializes pygame, creates game object"""
+        pygame.init()
+        reset_game_winner()
 
-    pygame.init()
-    reset_game_winner()
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption(TITLE)
 
-    screen = pygame.display.set_mode((WIDTH,HEIGHT))
-    pygame.display.set_caption(TITLE)
+        self.clock = pygame.time.Clock()
+        self.running = True
 
-    clock = pygame.time.Clock()
+        self.winner_show_delay = 200
+        self.winner_choose_delay = 3000
 
-    obstacle = create_center_obstacle()
+        self.fuel_spawn_time = 10000
+        self.time_from_fuel_spawn = pygame.time.get_ticks()
 
-    player1 = Player1(WIDTH // 4, HEIGHT // 4)
-    player2 = Player2(WIDTH * 3 // 4, HEIGHT *3 // 4)
-    needs_display = NeedsDisplay(player1, player2)
+        self.game_objects()
+        self.run()
 
-    players = pygame.sprite.Group()
-    players.add(player1, player2)
+    def game_objects(self) -> None:
+        """Creates players, obstacles, fuel, bullets and the sprite groups"""
+        self.obstacle = create_center_obstacle()
 
-    obstacles = pygame.sprite.Group()
-    obstacles.add(obstacle)
+        # spawn points of players and player logic
+        self.player1 = Player1(WIDTH // 4, HEIGHT // 4)
+        self.player2 = Player2(WIDTH * 3 // 4, HEIGHT * 3 // 4)
 
-    bullets = pygame.sprite.Group()
+        self.needs_display = NeedsDisplay(self.player1, self.player2)
+        
+        self.players = pygame.sprite.Group()
+        self.players.add(self.player1, self.player2)
 
-    fuel_cans = pygame.sprite.Group()
+        # Obstacl def
+        self.obstacles = pygame.sprite.Group()
+        self.obstacles.add(self.obstacle)
 
+        # Bullet and fuel def
+        self.bullets = pygame.sprite.Group()
+        self.fuel_cans = pygame.sprite.Group()
 
-    all_sprites = pygame.sprite.Group()
-    all_sprites.add(obstacle, player1, player2, fuel_cans)
+        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites.add(self.obstacle, self.player1, self.player2)
+    
+    def run(self) -> None:
+        """Running of the main game loop"""
+        while self.running:
+            self.clock.tick(FPS)
 
-    time_from_fuel_spawn = pygame.time.get_ticks()
-    fuel_spawn_time = 10000
-    winner_show_delay = 3000
-    winner_close_delay = 3000
+            self.handle_events()
+            self.update_game()
+            self.draw()
 
-    running = True
-    while running:
-        clock.tick(FPS)
+        pygame.quit()
 
+    def handle_events(self) -> None:
+        """Handling of pygame events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                self.running = False
+    
+    def update_game(self) -> None:
+        """
+        Update the game
+        
+        Handles players, fuel, bullets and winner logic
+        """
 
-        ## make obstacle
-
-
-        ## should probably be player1.update(keys) and player2....
+        # Keys is used by player.py for movement
         keys = pygame.key.get_pressed()
+
         winner = get_game_winner()
         winner_time = get_game_winner_time()
 
         if winner is None:
-            players.update(keys, obstacles, players, bullets, fuel_cans)
-            bullets.update(players, obstacles)
-            winner = get_game_winner()
-            winner_time = get_game_winner_time()
+            self.players.update(
+                keys,
+                self.obstacles,
+                self.players,
+                self.bullets,
+                self.fuel_cans,
+            )
 
-        current_time = pygame.time.get_ticks()
+            self.bullets.update(self.players, self.obstacles)
+        
+        self.spawn_fuel()
+        self.all_sprites.add(self.bullets)
 
-        if winner is None and len(fuel_cans) == 0 and current_time - time_from_fuel_spawn > fuel_spawn_time:
-            fuel = create_fuelcan()
-            fuel_cans.add(fuel)
-            all_sprites.add(fuel)
-            time_from_fuel_spawn = current_time
-
-        all_sprites.add(bullets)
-
-
-
-
-        screen.fill("black")
-        all_sprites.draw(screen)
-
-        needs_display.draw(screen)
+        #TODO kan ikke dette gjøres litt penere? se på hvis vi har tid
+        winner = get_game_winner()
+        winner_time = get_game_winner_time()
 
         if winner is not None and winner_time is not None:
+            self.handle_winner_time(winner_time)
+
+    def spawn_fuel(self) -> None:
+        """Spawn one fuel can, checks if there exists one fuel and if enough time has passed"""
+        current_time = pygame.time.get_ticks()
+
+        if len(self.fuel_cans) == 0 and current_time - self.time_from_fuel_spawn > self.fuel_spawn_time:
+            fuel = create_fuelcan()
+            self.fuel_cans.add(fuel)
+            self.all_sprites.add(fuel)
+            self.time_from_fuel_spawn = current_time
+    
+    def handle_winner_time(self, winner_time: int) -> None:
+        """Close the game after winner has been shown"""
+        #TODO implement a restart and score system instead
+        current_time = pygame.time.get_ticks()
+        time_since_winner = current_time - winner_time
+
+        if time_since_winner >= self.winner_show_delay + self.winner_choose_delay:
+            self.running = False
+    
+    def draw(self) -> None:
+        """Draw all sprites, the GUI and winner"""
+        self.screen.fill("black")
+
+        self.all_sprites.draw(self.screen)
+        self.needs_display.draw(self.screen)
+
+        winner = get_game_winner()
+        winner_time = get_game_winner_time()
+
+        if winner is not None and winner_time is not None:
+            current_time = pygame.time.get_ticks()
             time_since_winner = current_time - winner_time
 
-            if time_since_winner >= winner_show_delay:
-                winner_announcement = WinnerAnnouncement(winner)
-                winner_announcement.draw(screen)
-
-            if time_since_winner >= winner_show_delay + winner_close_delay:
-                running = False
-
-
+            if time_since_winner >= self.winner_show_delay:
+                winner_announcment = WinnerAnnouncement(winner)
+                winner_announcment.draw(self.screen)
+            
         pygame.display.flip()
+        
 
-    pygame.quit()
 
 
 
 if __name__ == "__main__":
     # run game
-    gameloop()
+    Game()
