@@ -126,7 +126,10 @@ class Ship(pygame.sprite.Sprite):
     def update_rect(self) -> None:
         self.rect = self.image.get_rect(center=(round(self.x), round(self.y)))
 
+
     def move(self) -> None:
         self.x += self.vx
         self.y += self.vy
         self.update_rect()
+
+
