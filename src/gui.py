@@ -1,7 +1,7 @@
 """
-GUI helpers for creating and drawing game visuals.
+GUI helpers for and object factory
 
-This file contains helpers for creating objects
+This file contains classes for creating game objects and drawing GUI elements
 
 Also contains GUI classes for the visual health, fuel, and winner announcment
 
@@ -16,37 +16,40 @@ import random
 from config import HEIGHT, OBSTACLE_COLOR, OBSTACLE_SIZE, WIDTH, FUEL_COLOR, FUEL_SIZE
 from src.objects import Obstacle, Fuel
 
+class ObjectFactory:
+	"""Factory class for creating objects"""
 
-def create_center_obstacle() -> Obstacle:
-	"""Create a static obstacle centered in the game window."""
-	return Obstacle(
-		x=(WIDTH - OBSTACLE_SIZE[0]) // 2,
-		y=(HEIGHT - OBSTACLE_SIZE[1]) // 2,
-		size=OBSTACLE_SIZE,
-		color=OBSTACLE_COLOR,
-	)
 
-def create_fuelcan() -> Fuel:
-	"""Create fuel can in random valid position
-	The fuel can can not spawn inside the center obstacle
-	"""
-	obstacle_rect = pygame.Rect(
-		(WIDTH - OBSTACLE_SIZE[0]) // 2,
-		(HEIGHT - OBSTACLE_SIZE[1]) // 2,
-		OBSTACLE_SIZE[0],
-		OBSTACLE_SIZE[1],
-	)
-
-	while True:
-		fuel = Fuel(
-			x=random.randint(0, WIDTH - FUEL_SIZE[0]),
-			y=random.randint(0, HEIGHT - FUEL_SIZE[1]),
-			size=FUEL_SIZE,
-			color=FUEL_COLOR,
+	def create_center_obstacle(self) -> Obstacle:
+		"""Create a static obstacle centered in the game window."""
+		return Obstacle(
+			x=(WIDTH - OBSTACLE_SIZE[0]) // 2,
+			y=(HEIGHT - OBSTACLE_SIZE[1]) // 2,
+			size=OBSTACLE_SIZE,
+			color=OBSTACLE_COLOR,
 		)
 
-		if not fuel.rect.colliderect(obstacle_rect):
-			return fuel
+	def create_fuelcan(self) -> Fuel:
+		"""Create fuel can in random valid position
+		The fuel can can not spawn inside the center obstacle
+		"""
+		obstacle_rect = pygame.Rect(
+			(WIDTH - OBSTACLE_SIZE[0]) // 2,
+			(HEIGHT - OBSTACLE_SIZE[1]) // 2,
+			OBSTACLE_SIZE[0],
+			OBSTACLE_SIZE[1],
+		)
+
+		while True:
+			fuel = Fuel(
+				x=random.randint(0, WIDTH - FUEL_SIZE[0]),
+				y=random.randint(0, HEIGHT - FUEL_SIZE[1]),
+				size=FUEL_SIZE,
+				color=FUEL_COLOR,
+			)
+
+			if not fuel.rect.colliderect(obstacle_rect):
+				return fuel
 
 
 

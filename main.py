@@ -1,6 +1,6 @@
 """
 Base of the code project
-This is the file to run for the project to run
+This is the file to run for the game to run
 The file has the main loop of the game
 
 Authors: Irjan Evertsen and Emil Olsen-Kristiansen
@@ -8,11 +8,11 @@ Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 
 
 import pygame
-from src.game_events import get_game_winner, get_game_winner_time, reset_game_winner
+from src.game_events import GameEvents
 from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
 
-from src.gui import NeedsDisplay, WinnerAnnouncement, create_center_obstacle, create_fuelcan
+from src.gui import NeedsDisplay, WinnerAnnouncement, ObjectFactory
 
 
 class Game():
@@ -23,7 +23,7 @@ class Game():
     def __init__(self) -> None:
         """Initializes pygame, creates game object"""
         pygame.init()
-        reset_game_winner()
+        self.game_events = GameEvents()
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -37,12 +37,14 @@ class Game():
         self.fuel_spawn_time = 10000
         self.time_from_fuel_spawn = pygame.time.get_ticks()
 
+        self.object_factory = ObjectFactory()
+
         self.game_objects()
         self.run()
 
     def game_objects(self) -> None:
         """Creates players, obstacles, fuel, bullets and the sprite groups"""
-        self.obstacle = create_center_obstacle()
+        self.obstacle = self.object_factory.create_center_obstacle()
 
         # spawn points of players and player logic
         self.player1 = Player1(WIDTH // 4, HEIGHT // 4)
@@ -60,6 +62,7 @@ class Game():
         # Bullet and fuel def
         self.bullets = pygame.sprite.Group()
         self.fuel_cans = pygame.sprite.Group()
+
 
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.obstacle, self.player1, self.player2)
@@ -91,8 +94,8 @@ class Game():
         # Keys is used by player.py for movement
         keys = pygame.key.get_pressed()
 
-        winner = get_game_winner()
-        winner_time = get_game_winner_time()
+        winner = self.game_events.get_game_winner()
+        winner_time = self.game_events.get_game_winner_time()
 
         if winner is None:
             self.players.update(
@@ -103,14 +106,13 @@ class Game():
                 self.fuel_cans,
             )
 
-            self.bullets.update(self.players, self.obstacles)
+            self.bullets.update(self.players, self.obstacles, self.game_events)
         
         self.spawn_fuel()
         self.all_sprites.add(self.bullets)
 
-        #TODO kan ikke dette gjøres litt penere? se på hvis vi har tid
-        winner = get_game_winner()
-        winner_time = get_game_winner_time()
+        winner = self.game_events.get_game_winner()
+        winner_time = self.game_events.get_game_winner_time()
 
         if winner is not None and winner_time is not None:
             self.handle_winner_time(winner_time)
@@ -120,7 +122,7 @@ class Game():
         current_time = pygame.time.get_ticks()
 
         if len(self.fuel_cans) == 0 and current_time - self.time_from_fuel_spawn > self.fuel_spawn_time:
-            fuel = create_fuelcan()
+            fuel = self.object_factory.create_fuelcan()
             self.fuel_cans.add(fuel)
             self.all_sprites.add(fuel)
             self.time_from_fuel_spawn = current_time
@@ -141,8 +143,8 @@ class Game():
         self.all_sprites.draw(self.screen)
         self.needs_display.draw(self.screen)
 
-        winner = get_game_winner()
-        winner_time = get_game_winner_time()
+        winner = self.game_events.get_game_winner()
+        winner_time = self.game_events.get_game_winner_time()
 
         if winner is not None and winner_time is not None:
             current_time = pygame.time.get_ticks()

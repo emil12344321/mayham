@@ -58,7 +58,7 @@ class Bullet(pygame.sprite.Sprite):
         self.vx = -math.sin(radians) * self.speed
         self.vy = -math.cos(radians) * self.speed
 
-    def update(self, players, obstacles: pygame.sprite.Group) -> None:
+    def update(self, players, obstacles: pygame.sprite.Group, game_events) -> None:
         """Handles bullet movment and collision with obstacles and the player"""
         self.x += self.vx
         self.y += self.vy
@@ -69,8 +69,7 @@ class Bullet(pygame.sprite.Sprite):
         # collision
         for player in players:
             if player != self.owner and pygame.sprite.collide_circle(self, player):
-                from src.game_events import bullet_hit_player
-                bullet_hit_player(self, player)  # reduserer needs.health
+                game_events.bullet_hit_player(self, player)  # reduserer needs.health
 
         ## outside boundaries
         if self.rect.right < 0 or self.rect.left > WIDTH:
