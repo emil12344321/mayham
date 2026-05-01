@@ -1,22 +1,11 @@
 """
-This file has the player script of the game
+This file contains the player script, classes, and needs object of the game
 
+Player class handles the shared player behaviour
+Player1 and Player2 inherit from Player and contain their own controls and the color of the player
+
+@AUTHORS: Irjan Evertsen and Emil Olsen-Kristiansen
 """
-
-
-
-## should have :
-"""
-player pos (self.x and self.y)
-velocity
-angle (self.angle)
-ship image (self.image)
-hitbox (self.x, self.y)
-update()
-draw()
-"""
-
-
 
 import math
 import pygame
@@ -24,21 +13,13 @@ import pygame
 from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH, FUEL_COOLDOWN
 from src.objects import Ship, Obstacle, Bullet
 
-"""
-Todo
-make code more object oriented. could probably use the same
-class and some form of polymorhpism
-
-"""
-
-
-"""
-Base player class, owns movement, physics, collison, rotation and drawing of player object
-Player1, Player2 own controls (input) and colour
-"""
 
 class Player(Ship):
+    """Base player class, hsa shared player behaviour like movement, gravity, collisions,
+    fuel usage, shooting, image rotation, and drawing
+    """
     def __init__(self, x, y, color, controls):
+        """Initialize a player at the given position with the right color and controls"""
         super().__init__(x,y, size=(40,40))
 
         self.controls = controls
@@ -68,12 +49,17 @@ class Player(Ship):
 
 
     def create_ship_surface(self) -> pygame.Surface:
+        """Create and return the triangular player image"""
         surface = pygame.Surface((40,40), pygame.SRCALPHA)
         pygame.draw.polygon(surface, self.color, [(20,0), (5,35),(35,35)])
         pygame.draw.rect(surface, "white", (17, 10, 6, 6))
         return surface
 
     def collision(self, obstacle) -> bool:
+        """Returns True if the player hitbox collides with an obstacle
+        
+        Contains the collision logic for circle-rectange collision
+        """
         pointx = max(obstacle.rect.left, min(self.x, obstacle.rect.right))
         pointy = max(obstacle.rect.top, min(self.y, obstacle.rect.bottom))
 
@@ -82,9 +68,11 @@ class Player(Ship):
 
         return (dx * dx + dy * dy) < (self.radius * self.radius)
 
-
-    # changed to use circle hitbox
     def inside_screen(self) -> None:
+        """Keeps the player inside the screen
+        
+        Uses the circular hitbox of the player
+        """
         if self.x - self.radius < 0:
             self.x = self.radius
             self.vx = -self.vx / 4
@@ -104,6 +92,7 @@ class Player(Ship):
         self.update_rect()
 
     def shoot(self, bullets) -> None:
+        """Shoots a bullet if the cooldown check passes"""
         time = pygame.time.get_ticks()
 
         if time - self.last_shot < self.bullet_cooldown:
@@ -115,8 +104,8 @@ class Player(Ship):
 
         self.last_shot = time
 
-    ### Fuel methods, TODO Change these when the needs object is added, this logic is temporery
     def pick_up_fuel(self, fuel_cans) -> None:
+        """Checks for player collision with fuel, adds fuel if collision"""
         fuel_touch = pygame.sprite.spritecollide(self, fuel_cans, True, pygame.sprite.collide_circle)
 
         ## change this with needs object
@@ -125,6 +114,11 @@ class Player(Ship):
 
 
     def update(self, keys, obstacles, players, bullets, fuel_cans) -> None:
+        """Updates the player every frame
+        
+        Updates gravity, movement, screen bounds, input, image rotation,
+        collision and fuel
+        """
         #rotation
         old_x = self.x
         old_y = self.y
@@ -161,6 +155,7 @@ class Player(Ship):
 
 
     def undo_movement(self, old_x, old_y) -> None:
+        """Moves the player back to its old position and flips its velocity"""
         self.x = old_x
         self.y = old_y
         self.vx = -self.vx
@@ -168,6 +163,7 @@ class Player(Ship):
         self.update_rect()
 
     def handle_input(self, keys, bullets) -> None:
+        """Handles the player input for rotation, thrust, fuel, and shooting"""
         if keys[self.controls["left"]]:
             self.angle += self.rotation_speed
 
@@ -189,12 +185,12 @@ class Player(Ship):
             self.shoot(bullets)
 
 
-    def draw(self, screen: pygame.Surface) -> None:
-        screen.blit(self.image, self.rect)
 
 
 class Player1(Player):
+    """Player 1 controlled by arrow keys and right shift"""
     def __init__(self, x: float, y: float) -> None:
+        """Create player1 with color and controls"""
         controls = {
             "left": pygame.K_LEFT,
             "right": pygame.K_RIGHT,
@@ -207,7 +203,9 @@ class Player1(Player):
 
 
 class Player2(Player):
+    """Player 2 controlled by WASD and SPACE"""
     def __init__(self, x: float, y: float) -> None:
+        """Create player2 with color and controls"""
         controls = {
             "left": pygame.K_a,
             "right": pygame.K_d,
@@ -219,7 +217,7 @@ class Player2(Player):
 
 
 class Needs:
-    "Holder status for enhver spiller"
+    """Keeps the health and fuel for each player"""
     def __init__(self) -> None:
         self.max_fuel = STARTING_FUEL
         self.fuel = STARTING_FUEL
@@ -227,8 +225,7 @@ class Needs:
 
     def has_fuel(self) -> bool:
         """Returns true if the player still has fuel"""
-        if self.fuel > 0:
-            return True
+        return self.fuel > 0
     
     def use_fuel(self, amount: int) -> None:
         """Method for player using fuel, used by thrust"""

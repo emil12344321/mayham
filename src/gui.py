@@ -1,6 +1,10 @@
 """
 GUI helpers for creating and drawing game visuals.
 
+This file contains helpers for creating objects
+
+Also contains GUI classes for the visual health, fuel, and winner announcment
+
 Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
@@ -23,7 +27,9 @@ def create_center_obstacle() -> Obstacle:
 	)
 
 def create_fuelcan() -> Fuel:
-	"""Create fuel can in random position"""
+	"""Create fuel can in random valid position
+	The fuel can can not spawn inside the center obstacle
+	"""
 	obstacle_rect = pygame.Rect(
 		(WIDTH - OBSTACLE_SIZE[0]) // 2,
 		(HEIGHT - OBSTACLE_SIZE[1]) // 2,
@@ -43,17 +49,12 @@ def create_fuelcan() -> Fuel:
 			return fuel
 
 
-def draw_frame(screen: pygame.Surface, ships: pygame.sprite.Group, obstacle: Obstacle) -> None:
-	"""Draw one frame of the game scene."""
-	screen.fill("black")
-	obstacle.draw(screen)
-	ships.draw(screen)
-
 
 class NeedsDisplay:
 	"""Display health and fuel for both players."""
 
 	def __init__(self, player1, player2) -> None:
+		"""Create the needs display for the players"""
 		self.player1 = player1
 		self.player2 = player2
 		self.font = pygame.font.SysFont(None, 28)
@@ -69,9 +70,11 @@ class NeedsDisplay:
 		self._draw_text(screen, player2_text, self.player2_color, (WIDTH - 20, 20), align_right=True)
 
 	def _create_player_text(self, label: str, player) -> str:
+		"""Create the health and fuel text for one player"""
 		return f"{label}  Health: {player.needs.health}  Fuel: {player.needs.fuel}"
 
 	def _draw_text(self, screen: pygame.Surface, text: str, color, position, align_right: bool = False) -> None:
+		"""Draw the text on the screen at given position"""
 		text_surface = self.font.render(text, True, color)
 		text_rect = text_surface.get_rect()
 		if align_right:
@@ -85,6 +88,7 @@ class WinnerAnnouncement:
 	"""Display the winning player in a centered box."""
 
 	def __init__(self, winner) -> None:
+		"""Create a winner announcment for the winner"""
 		self.winner = winner
 		self.font = pygame.font.SysFont(None, 100)
 		self.box_color = (25, 25, 25)

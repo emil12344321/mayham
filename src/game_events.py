@@ -4,6 +4,7 @@ Authors: Irjan Evertsen and Emil Olsen-Kristiansen
 """
 
 from __future__ import annotations
+from config import BULLET_DAMAGE
 
 import pygame
 
@@ -63,13 +64,12 @@ def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> 
 
 
 def bullet_hit_player(bullet, player) -> None:
-    from config import BULLET_DAMAGE
+	"""Updates the player health when hit by a bullet"""
+	player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
+	bullet.kill()
 
-    player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
-    bullet.kill()
-
-    if player.needs.health == 0 and player.is_alive:
-        player_died(player, bullet.owner)
+	if player.needs.health == 0 and player.is_alive:
+		player_died(player, bullet.owner)
 
 
 def player_died(player, killer) -> None:
