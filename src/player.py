@@ -52,6 +52,7 @@ class Player(Ship):
 
         # holder fuel og health for enhver spiller
         self.needs = Needs()
+        self.is_alive = True
 
         self.bullet_cooldown = 300 # miliseconds
         self.last_shot = 0

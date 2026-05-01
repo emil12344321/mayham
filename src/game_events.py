@@ -8,6 +8,8 @@ from __future__ import annotations
 import pygame
 
 
+
+
 def reverse_ship_if_obstacle_hit(ships: pygame.sprite.Group, obstacle: pygame.sprite.Sprite) -> bool:
 	"""Reverse only ships that collide with the obstacle.
 
@@ -53,3 +55,29 @@ def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> 
 				ship.reverse_direction()
 
 	return should_reverse
+
+
+
+# ====================== a player died and winner is decided functions ==============================
+
+
+def bullet_hit_player(bullet, player) -> None:
+    from config import BULLET_DAMAGE
+
+    player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
+    bullet.kill()
+
+    if player.needs.health == 0:
+        player_died(player, bullet.owner)
+
+
+
+
+def player_died(player, killer) -> None:
+    """Mark a player as dead and pass the killer to the winner handler."""
+    player.is_alive = False
+    player.kill()
+
+
+	
+#=================================================================================================

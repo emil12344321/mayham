@@ -19,7 +19,6 @@ import pygame
 import math
 from config import WIDTH, HEIGHT, BULLETSPEED
 
-
 class Obstacle(pygame.sprite.Sprite):
     """A static rectangular obstacle that ships can collide with."""
 
@@ -73,8 +72,8 @@ class Bullet(pygame.sprite.Sprite):
         # collision
         for player in players:
             if player != self.owner and pygame.sprite.collide_circle(self, player):
-                player.undo_movement(player.x, player.y)  # or damage later
-                self.kill()
+                from src.game_events import bullet_hit_player
+                bullet_hit_player(self, player)  # reduserer needs.health
 
         ## outside boundaries
         if self.rect.right < 0 or self.rect.left > WIDTH:
@@ -131,4 +130,3 @@ class Ship(pygame.sprite.Sprite):
         self.x += self.vx
         self.y += self.vy
         self.update_rect()
-
