@@ -85,7 +85,7 @@ class WinnerAnnouncement:
 
 	def __init__(self, winner) -> None:
 		self.winner = winner
-		self.font = pygame.font.SysFont(None, 52)
+		self.font = pygame.font.SysFont(None, 100)
 		self.box_color = (25, 25, 25)
 		self.border_color = (255, 255, 255)
 		self.text_color = (255, 255, 255)
@@ -96,7 +96,7 @@ class WinnerAnnouncement:
 		text_surface = self.font.render(f"Winner is {winner_name}", True, self.text_color)
 		text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 
-		box_rect = text_rect.inflate(80, 50)
+		box_rect = text_rect.inflate(130, 110)
 		pygame.draw.rect(screen, self.box_color, box_rect)
 		pygame.draw.rect(screen, self.border_color, box_rect, 3)
 		screen.blit(text_surface, text_rect)

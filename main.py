@@ -16,10 +16,11 @@ add needs object and visual health + fuel
 
 
 import pygame
+from src.game_events import get_game_winner, get_game_winner_time, reset_game_winner
 from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
 
-from src.gui import NeedsDisplay, create_center_obstacle, create_fuelcan
+from src.gui import NeedsDisplay, WinnerAnnouncement, create_center_obstacle, create_fuelcan
 
 ##from src.game_events import reverse_ships_if_edge_hit
 from src.objects import Ship, Bullet
@@ -33,6 +34,7 @@ def gameloop() -> None:
     """
 
     pygame.init()
+    reset_game_winner()
 
     screen = pygame.display.set_mode((WIDTH,HEIGHT))
     pygame.display.set_caption(TITLE)
@@ -61,6 +63,8 @@ def gameloop() -> None:
 
     time_from_fuel_spawn = pygame.time.get_ticks()
     fuel_spawn_time = 10000
+    winner_show_delay = 3000
+    winner_close_delay = 3000
 
     running = True
     while running:
@@ -71,17 +75,22 @@ def gameloop() -> None:
                 running = False
 
         ## make obstacle
-        
 
-        ## should probably be player1.update(keys) and player2.... 
+
+        ## should probably be player1.update(keys) and player2....
         keys = pygame.key.get_pressed()
+        winner = get_game_winner()
+        winner_time = get_game_winner_time()
 
-        players.update(keys, obstacles, players, bullets, fuel_cans)
-        bullets.update(players, obstacles)
+        if winner is None:
+            players.update(keys, obstacles, players, bullets, fuel_cans)
+            bullets.update(players, obstacles)
+            winner = get_game_winner()
+            winner_time = get_game_winner_time()
 
         current_time = pygame.time.get_ticks()
 
-        if len(fuel_cans) == 0 and current_time - time_from_fuel_spawn > fuel_spawn_time:
+        if winner is None and len(fuel_cans) == 0 and current_time - time_from_fuel_spawn > fuel_spawn_time:
             fuel = create_fuelcan()
             fuel_cans.add(fuel)
             all_sprites.add(fuel)
@@ -90,13 +99,23 @@ def gameloop() -> None:
         all_sprites.add(bullets)
 
 
-        
+
 
         screen.fill("black")
         all_sprites.draw(screen)
 
         needs_display.draw(screen)
-        
+
+        if winner is not None and winner_time is not None:
+            time_since_winner = current_time - winner_time
+
+            if time_since_winner >= winner_show_delay:
+                winner_announcement = WinnerAnnouncement(winner)
+                winner_announcement.draw(screen)
+
+            if time_since_winner >= winner_show_delay + winner_close_delay:
+                running = False
+
 
         pygame.display.flip()
 
@@ -107,4 +126,3 @@ def gameloop() -> None:
 if __name__ == "__main__":
     # run game
     gameloop()
-

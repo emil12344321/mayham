@@ -7,7 +7,12 @@ from __future__ import annotations
 
 import pygame
 
+game_winner_player = None
+game_winner_time = None
 
+
+game_winner_player = None
+game_winner_time = None
 
 
 def reverse_ship_if_obstacle_hit(ships: pygame.sprite.Group, obstacle: pygame.sprite.Sprite) -> bool:
@@ -57,27 +62,49 @@ def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> 
 	return should_reverse
 
 
-
-# ====================== a player died and winner is decided functions ==============================
-
-
 def bullet_hit_player(bullet, player) -> None:
     from config import BULLET_DAMAGE
 
     player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
     bullet.kill()
 
-    if player.needs.health == 0:
+    if player.needs.health == 0 and player.is_alive:
         player_died(player, bullet.owner)
-
-
 
 
 def player_died(player, killer) -> None:
     """Mark a player as dead and pass the killer to the winner handler."""
     player.is_alive = False
     player.kill()
+    game_winner(killer)
 
 
-	
-#=================================================================================================
+def game_winner(winner) -> None:
+    """Store the winner and when the game ended."""
+    global game_winner_player, game_winner_time
+
+    game_winner_player = winner
+    game_winner_time = pygame.time.get_ticks()
+
+
+def get_game_winner():
+    """Return the winner if the game has ended."""
+    return game_winner_player
+
+
+def get_game_winner_time():
+    """Return when the winner was decided."""
+    return game_winner_time
+
+
+def reset_game_winner() -> None:
+    """Clear winner state before a new game starts."""
+    global game_winner_player, game_winner_time
+
+    game_winner_player = None
+    game_winner_time = None
+
+
+def game_vinner(winner) -> None:
+    """Norwegian alias for game_winner."""
+    game_winner(winner)

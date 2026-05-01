@@ -1,4 +1,4 @@
-""" 
+"""
 This file has the player script of the game
 
 """
@@ -16,7 +16,7 @@ update()
 draw()
 """
 
-        
+
 
 import math
 import pygame
@@ -26,7 +26,7 @@ from src.objects import Ship, Obstacle, Bullet
 
 """
 Todo
-make code more object oriented. could probably use the same 
+make code more object oriented. could probably use the same
 class and some form of polymorhpism
 
 """
@@ -50,7 +50,7 @@ class Player(Ship):
         self.radius = 18
         self.gravity = GRAVITY
 
-        # holder fuel og health for enhver spiller
+        # Needs holder fuel og health for enhver spiller
         self.needs = Needs()
         self.is_alive = True
 
@@ -68,7 +68,7 @@ class Player(Ship):
         pygame.draw.polygon(surface, self.color, [(20,0), (5,35),(35,35)])
         pygame.draw.rect(surface, "white", (17, 10, 6, 6))
         return surface
-    
+
     def collision(self, obstacle) -> bool:
         pointx = max(obstacle.rect.left, min(self.x, obstacle.rect.right))
         pointy = max(obstacle.rect.top, min(self.y, obstacle.rect.bottom))
@@ -104,7 +104,7 @@ class Player(Ship):
 
         if time - self.last_shot < self.bullet_cooldown:
             return
-        
+
 
         bullet = Bullet(self.x, self.y, self.angle, self)
         bullets.add(bullet)
@@ -126,7 +126,7 @@ class Player(Ship):
         #rotation
         old_x = self.x
         old_y = self.y
-            
+
         # gravity
         self.vy += self.gravity
 
@@ -177,7 +177,7 @@ class Player(Ship):
             self.vx -= (math.sin(radians) * self.thrust)/3
             self.vy -= math.cos(radians) * self.thrust
             # self.fuel -= 1
-        
+
         if keys[self.controls["shoot"]]:
             self.shoot(bullets)
 
