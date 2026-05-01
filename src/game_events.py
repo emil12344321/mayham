@@ -63,6 +63,7 @@ def reverse_ships_if_edge_hit(ships: pygame.sprite.Group, screen_width: int) -> 
 
 
 def bullet_hit_player(bullet, player) -> None:
+    """bullet give damage"""
     from config import BULLET_DAMAGE
 
     player.needs.health = max(0, player.needs.health - BULLET_DAMAGE)
@@ -70,6 +71,16 @@ def bullet_hit_player(bullet, player) -> None:
 
     if player.needs.health == 0 and player.is_alive:
         player_died(player, bullet.owner)
+
+
+def wall_or_obstacle_damage(player, killer) -> None:
+    """Damage a player after hitting a wall or obstacle."""
+    from config import WALL_DAMAGE
+
+    player.needs.health = max(0, player.needs.health - WALL_DAMAGE)
+
+    if player.needs.health == 0 and player.is_alive:
+        player_died(player, killer)
 
 
 def player_died(player, killer) -> None:

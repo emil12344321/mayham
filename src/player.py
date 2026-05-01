@@ -22,6 +22,7 @@ import math
 import pygame
 
 from config import GRAVITY, STARTING_FUEL, THRUST, WIDTH, HEIGHT, STARTING_HEALTH, FUEL_COOLDOWN
+from src.game_events import wall_or_obstacle_damage
 from src.objects import Ship, Obstacle, Bullet
 
 """
@@ -60,6 +61,8 @@ class Player(Ship):
 
         self.bullet_cooldown = 300 # miliseconds
         self.last_shot = 0
+        self.wall_damage_cooldown = 500
+        self.last_wall_damage = -self.wall_damage_cooldown
 
         # update player image
         self.original_image = self.create_ship_surface()
@@ -138,7 +141,11 @@ class Player(Ship):
         #movement
         self.move()
 
+        moved_x = self.x
+        moved_y = self.y
         self.inside_screen()
+        if self.x != moved_x or self.y != moved_y:
+            self.take_wall_or_obstacle_damage(players)
 
         #input
         self.handle_input(keys, bullets)
@@ -150,6 +157,7 @@ class Player(Ship):
         for obstacle in obstacles:
             if self.collision(obstacle):
                 self.undo_movement(old_x, old_y)
+                self.take_wall_or_obstacle_damage(players)
 
         sprite_collision = pygame.sprite.spritecollide(self, players, False, pygame.sprite.collide_circle)
 
@@ -158,6 +166,22 @@ class Player(Ship):
             if player != self:
                 self.undo_movement(old_x, old_y)
                 break
+
+    def take_wall_or_obstacle_damage(self, players) -> None:
+        current_time = pygame.time.get_ticks()
+
+        if current_time - self.last_wall_damage < self.wall_damage_cooldown:
+            return
+
+        opponent = self.get_opponent(players)
+        wall_or_obstacle_damage(self, opponent)
+        self.last_wall_damage = current_time
+
+    def get_opponent(self, players):
+        for player in players:
+            if player != self:
+                return player
+        return None
 
 
     def undo_movement(self, old_x, old_y) -> None:
