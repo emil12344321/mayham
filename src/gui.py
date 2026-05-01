@@ -10,6 +10,7 @@ import pygame
 import random
 
 from config import HEIGHT, OBSTACLE_COLOR, OBSTACLE_SIZE, WIDTH, FUEL_COLOR, FUEL_SIZE
+from src.game_events import get_scores
 from src.objects import Obstacle, Fuel
 
 
@@ -106,3 +107,22 @@ class WinnerAnnouncement:
 def winner_to_text(winner) -> str:
 	"""Return a readable winner name."""
 	return winner.__class__.__name__
+
+
+class Scoreboard:
+	"""Display player scores."""
+
+	def __init__(self) -> None:
+		self.font = pygame.font.SysFont(None, 32)
+		self.text_color = (255, 255, 255)
+
+	def draw(self, screen: pygame.Surface) -> None:
+		"""Draw player scores at the top center of the screen."""
+		scores = get_scores()
+		text = f"Player 1: {scores['Player1']}  Player 2: {scores['Player2']}"
+		text_surface = self.font.render(text, True, self.text_color)
+		text_rect = text_surface.get_rect(midtop=(WIDTH // 2, 20))
+		screen.blit(text_surface, text_rect)
+
+
+	

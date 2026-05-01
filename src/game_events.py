@@ -9,10 +9,10 @@ import pygame
 
 game_winner_player = None
 game_winner_time = None
-
-
-game_winner_player = None
-game_winner_time = None
+player_scores = {
+    "Player1": 0,
+    "Player2": 0,
+}
 
 
 def reverse_ship_if_obstacle_hit(ships: pygame.sprite.Group, obstacle: pygame.sprite.Sprite) -> bool:
@@ -80,11 +80,18 @@ def player_died(player, killer) -> None:
 
 
 def game_winner(winner) -> None:
-    """Store the winner and when the game ended."""
+    """Store the winner, update score and when the game ended."""
     global game_winner_player, game_winner_time
+
+    if game_winner_player is not None:
+        return
 
     game_winner_player = winner
     game_winner_time = pygame.time.get_ticks()
+
+    winner_name = winner.__class__.__name__
+    if winner_name in player_scores:
+        player_scores[winner_name] += 1
 
 
 def get_game_winner():
@@ -97,10 +104,14 @@ def get_game_winner_time():
     return game_winner_time
 
 
+def get_scores():
+    """Return a copy of the current player scores."""
+    return player_scores.copy()
+
+
 def reset_game_winner() -> None:
     """Clear winner state before a new game starts."""
     global game_winner_player, game_winner_time
 
     game_winner_player = None
     game_winner_time = None
-

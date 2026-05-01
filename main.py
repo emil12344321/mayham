@@ -12,7 +12,7 @@ from src.game_events import get_game_winner, get_game_winner_time, reset_game_wi
 from src.player import Player1, Player2
 from config import FPS, HEIGHT, TITLE, WIDTH
 
-from src.gui import NeedsDisplay, WinnerAnnouncement, create_center_obstacle, create_fuelcan
+from src.gui import NeedsDisplay, Scoreboard, WinnerAnnouncement, create_center_obstacle, create_fuelcan
 
 
 class Game():
@@ -37,18 +37,24 @@ class Game():
         self.fuel_spawn_time = 10000
         self.time_from_fuel_spawn = pygame.time.get_ticks()
 
-        self.game_objects()
+        self.start_new_round()
         self.run()
+
+    def start_new_round(self) -> None:
+        """Reset winner state and create fresh game objects for a new round."""
+        reset_game_winner()
+        self.time_from_fuel_spawn = pygame.time.get_ticks()
+        self.game_objects()
 
     def game_objects(self) -> None:
         """Creates players, obstacles, fuel, bullets and the sprite groups"""
         self.obstacle = create_center_obstacle()
-
         # spawn points of players and player logic
         self.player1 = Player1(WIDTH // 4, HEIGHT // 4)
         self.player2 = Player2(WIDTH * 3 // 4, HEIGHT * 3 // 4)
 
         self.needs_display = NeedsDisplay(self.player1, self.player2)
+        self.scoreboard = Scoreboard()
         
         self.players = pygame.sprite.Group()
         self.players.add(self.player1, self.player2)
@@ -126,13 +132,12 @@ class Game():
             self.time_from_fuel_spawn = current_time
     
     def handle_winner_time(self, winner_time: int) -> None:
-        """Close the game after winner has been shown"""
-        #TODO implement a restart and score system instead
+        """Start a new round after winner has been shown."""
         current_time = pygame.time.get_ticks()
         time_since_winner = current_time - winner_time
 
         if time_since_winner >= self.winner_show_delay + self.winner_choose_delay:
-            self.running = False
+            self.start_new_round()
     
     def draw(self) -> None:
         """Draw all sprites, the GUI and winner"""
@@ -140,6 +145,7 @@ class Game():
 
         self.all_sprites.draw(self.screen)
         self.needs_display.draw(self.screen)
+        self.scoreboard.draw(self.screen)
 
         winner = get_game_winner()
         winner_time = get_game_winner_time()
